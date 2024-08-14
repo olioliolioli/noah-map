@@ -1,0 +1,390 @@
+// Variables
+$font-family: "GT America Standard", sans-serif;
+$text-color: #111;
+$text-color-light: #777;
+$ocean-color: #ffffff;
+$map-stroke-color: #8c8c8c;
+$map-active-stroke-color: #ff6600;
+$map-active-stroke-width: 1px;
+
+// Mixins
+@mixin flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@mixin absolute-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+// Font face
+@font-face {
+  font-family: "GT America Standard";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url("https://assets.noah.com/fonts/gt-america-standard/gt-america-standard-medium.woff2") format("woff2"),
+       url("https://assets.noah.com/fonts/gt-america-standard/gt-america-standard-medium.woff") format("woff"),
+       url("https://assets.noah.com/fonts/gt-america-standard/gt-america-standard-medium.otf") format("opentype"),
+       url("https://assets.noah.com/fonts/gt-america-standard/gt-america-standard-medium.ttf") format("truetype");
+}
+
+// Base styles
+html {
+  font-family: $font-family;
+  margin: 0;
+  padding: 0;
+}
+
+// Map styles
+.svgMap {
+  &-wrapper,
+  &-container {
+    position: relative;
+  }
+
+  &-block-zoom-notice {
+    position: absolute;
+    z-index: 2;
+    top: 100%;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    pointer-events: none;
+    opacity: 0;
+    color: #fff;
+    transition: opacity 250ms;
+
+    .svgMap-block-zoom-notice-active & {
+      pointer-events: all;
+      top: 0;
+      opacity: 1;
+    }
+
+    > div {
+      @include absolute-center;
+      text-align: center;
+      padding: 0 32px;
+      font-size: 28px;
+
+      @media (max-width: 900px) {
+        font-size: 22px;
+      }
+    }
+  }
+
+  &-map-wrapper {
+    position: relative;
+    width: 100%;
+    padding-top: 50%;
+    overflow: hidden;
+    background: $ocean-color;
+    color: $text-color;
+
+    * {
+      box-sizing: border-box;
+    }
+
+    :focus:not(:focus-visible) {
+      outline: 0;
+    }
+
+    .svgMap-map-image {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+    }
+  }
+
+  // Controls
+  &-map-controls-wrapper {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    z-index: 1;
+    display: flex;
+    overflow: hidden;
+    border-radius: 2px;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+  }
+
+  &-map-controls-zoom,
+  &-map-controls-move {
+    display: flex;
+    margin-right: 5px;
+    overflow: hidden;
+    background: #fff;
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+
+  &-control-button {
+    background-color: transparent;
+    border: none;
+    border-radius: 0;
+    color: inherit;
+    font: inherit;
+    line-height: inherit;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+    text-transform: none;
+    appearance: none;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    position: relative;
+
+    &.svgMap-zoom-button {
+      &::before,
+      &::after {
+        content: "";
+        @include absolute-center;
+        background: #666;
+        transition: background-color 250ms;
+      }
+
+      &::before {
+        width: 11px;
+        height: 3px;
+      }
+
+      &.svgMap-zoom-reset-button::before {
+        width: 11px;
+        height: 11px;
+        background: none;
+        border: 2px solid #666;
+      }
+
+      @media (hover: hover) {
+        &:hover {
+          &::before,
+          &::after {
+            background: $text-color;
+          }
+        }
+      }
+
+      &:active {
+        &::before,
+        &::after {
+          background: $text-color;
+        }
+      }
+
+      &.svgMap-disabled {
+        &::before,
+        &::after {
+          background: #ccc;
+        }
+
+        &.svgMap-zoom-reset-button::before {
+          border-color: #ccc;
+          background: none;
+        }
+      }
+    }
+
+    &.svgMap-zoom-in-button {
+      margin: 1px 0 1px 1px;
+
+      &::after {
+        width: 3px;
+        height: 11px;
+      }
+    }
+
+    &.svgMap-zoom-out-button {
+      margin: 1px 1px 1px 0;
+    }
+  }
+
+  // Continent controls
+  &-map-continent-controls-wrapper {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 1;
+    display: flex;
+    border-radius: 2px;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+  }
+
+  // Countries
+  &-country {
+    stroke: $map-stroke-color;
+    stroke-width: 0.5;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+    transition: fill 250ms, stroke 250ms;
+
+    &[data-link] {
+      cursor: pointer;
+    }
+
+    @media (hover: hover) {
+      &:hover {
+        stroke: $map-active-stroke-color;
+        stroke-width: $map-active-stroke-width;
+      }
+    }
+
+    &.svgMap-active {
+      stroke: $map-active-stroke-color;
+      stroke-width: $map-active-stroke-width;
+    }
+  }
+}
+
+// Tooltip styles
+.svgMap-tooltip {
+  box-shadow: 0 4px 28px #d7d7d7;
+  position: absolute;
+  z-index: 2;
+  background: #fff;
+  transform: translate(-50%, -100%);
+  display: none;
+  pointer-events: none;
+  min-width: 60px;
+  border-radius: 8px;
+
+  &.svgMap-tooltip-flipped {
+    transform: translate(-50%, 0);
+  }
+
+  &.svgMap-active {
+    display: block;
+  }
+
+  &-content-container {
+    position: relative;
+    padding: 10px 20px;
+  }
+
+  &-flag-container {
+    text-align: center;
+    margin: 2px 0 5px;
+
+    &.svgMap-tooltip-flag-container-emoji {
+      font-size: 50px;
+      line-height: 0;
+      padding: 25px 0 15px;
+    }
+
+    .svgMap-tooltip-flag {
+      display: block;
+      margin: auto;
+      width: auto;
+      height: 32px;
+      padding: 2px;
+      background: rgba(0, 0, 0, 0.15);
+      border-radius: 2px; 
+    }
+  }
+
+  &-title {
+    font-size: 18px;
+    line-height: 28px;
+    padding: 0 0 8px;
+    text-align: center;
+  }
+
+  &-content {
+    text-align: center;
+    font-size: 14px;
+    color: $text-color-light;
+    margin: -5px 0 0;
+
+    table {
+      padding: 0;
+      border-spacing: 0;
+      margin: auto;
+
+      td {
+        padding: 2px 0;
+        text-align: left;
+
+        span {
+          color: $text-color;
+        }
+
+        &:first-child {
+          padding-right: 10px;
+          text-align: right;
+        }
+
+        sup {
+          vertical-align: baseline;
+          position: relative;
+          top: -5px;
+        }
+      }
+    }
+
+    .svgMap-tooltip-no-data {
+      padding: 2px 0;
+      color: $text-color-light;
+      font-style: italic;
+    }
+  }
+
+  &-pointer {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    overflow: hidden;
+    height: 10px;
+    width: 30px;
+
+    &::after {
+      content: '';
+      width: 20px;
+      height: 20px;
+      background: #fff;
+      position: absolute;
+      bottom: 6px;
+      left: 50%;
+      transform: translateX(-50%) rotate(45deg);
+    }
+  }
+
+  &.svgMap-tooltip-flipped .svgMap-tooltip-pointer {
+    bottom: auto;
+    top: -10px;
+    transform: translateX(-50%) scaleY(-1);
+  }
+}
+
+.svgMap-tooltip-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+
+  th,
+  td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+    font-size: 12px;
+  }
+
+  th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+  }
+
+  tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+}
